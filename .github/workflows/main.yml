@@ -31,19 +31,14 @@ jobs:
 
       - name: Create executable (PyInstaller)
         run: |
-          # Use your actual main script file name, e.g., 'main.py'
-          # --onefile: Creates a single executable file.
-          # --windowed or --noconsole: For GUI apps, prevents a console window from opening.
-          # --icon: Path to your application icon (e.g., 'icon.ico' for Windows, 'icon.icns' for macOS).
-          # For a Tkinter app, '--windowed' is usually appropriate.
-          pyinstaller --onefile --windowed --name "CALCULATOR.py" your_app_script.py
-        shell: bash # Use bash shell for cross-platform compatibility where possible
+          pyinstaller --onefile --windowed --name "CALCULATOR" CALCULATOR.py
+        shell: bash
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4 # <--- CHANGED FROM V3 TO V4
+        uses: actions/upload-artifact@v4 # Updated to v4
         with:
           name: YourAppName-${{ matrix.os }}
-          path: dist/YourAppName${{ startsWith(matrix.os, 'windows') && '.exe' || '' }} # Adds .exe extension for Windows
+          path: dist/YourAppName${{ startsWith(matrix.os, 'windows') && '.exe' || '' }}
 
 
   # --- Android APK Build (Kivy + Buildozer) ---
@@ -67,15 +62,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Buildozer and Kivy
+      - name: Install Buildozer, Kivy, and Cython # <-- Changed step name for clarity
         run: |
           python -m pip install --upgrade pip
-          pip install virtualenv # Buildozer often uses virtualenvs
+          pip install virtualenv
+          pip install cython # <--- ADDED THIS LINE
           pip install buildozer kivy
 
       - name: Initialize Buildozer spec file (if not already present)
-        # This step is usually done once locally and the buildozer.spec is committed.
-        # If it's already in your repo, you can skip this.
         run: |
           buildozer init
           # If you have specific Android app settings, modify buildozer.spec here or ensure it's committed
@@ -88,12 +82,10 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # The 'debug' build is faster for CI. Use 'release' for app stores (requires keystore management).
-          # This command will download Android SDK/NDK components and compile.
           buildozer android debug
 
       - name: Upload Android APK artifact
-        uses: actions/upload-artifact@v4 # <--- CHANGED FROM V3 TO V4
+        uses: actions/upload-artifact@v4 # Updated to v4
         with:
           name: YourAppName-Android-APK
           path: bin/*.apk # Buildozer places the APK in the 'bin' directory
