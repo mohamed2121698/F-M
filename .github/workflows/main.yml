@@ -40,7 +40,7 @@ jobs:
         shell: bash # Use bash shell for cross-platform compatibility where possible
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # <--- CHANGED FROM V3 TO V4
         with:
           name: YourAppName-${{ matrix.os }}
           path: dist/YourAppName${{ startsWith(matrix.os, 'windows') && '.exe' || '' }} # Adds .exe extension for Windows
@@ -93,7 +93,7 @@ jobs:
           buildozer android debug
 
       - name: Upload Android APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # <--- CHANGED FROM V3 TO V4
         with:
           name: YourAppName-Android-APK
           path: bin/*.apk # Buildozer places the APK in the 'bin' directory
