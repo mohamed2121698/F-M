@@ -7,13 +7,13 @@ on:
   workflow_dispatch: # Allows manual trigger of the workflow
 
 jobs:
-  # --- Desktop Builds (Windows, macOS, Linux) using PyInstaller ---
+  # ... (build-desktop job remains unchanged) ...
   build-desktop:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9'] # Or your preferred Python version
+        python-version: ['3.9']
 
     steps:
       - name: Checkout code
@@ -27,30 +27,23 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller # Tkinter and math are standard, no separate install needed
+          pip install pyinstaller
 
       - name: Create executable (PyInstaller)
         run: |
-          # Use your actual main script file name, e.g., 'main.py'
-          # --onefile: Creates a single executable file.
-          # --windowed or --noconsole: For GUI apps, prevents a console window from opening.
-          # --icon: Path to your application icon (e.g., 'icon.ico' for Windows, 'icon.icns' for macOS).
-          # For a Tkinter app, '--windowed' is usually appropriate.
-          pyinstaller --onefile --windowed --name "YourAppName" your_app_script.py
-        shell: bash # Use bash shell for cross-platform compatibility where possible
+          pyinstaller --onefile --windowed --name "CALCULATOR" CALCULATOR.py
+        shell: bash
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: YourAppName-${{ matrix.os }}
-          path: dist/YourAppName${{ startsWith(matrix.os, 'windows') && '.exe' || '' }} # Adds .exe extension for Windows
+          name: CALCULATOR-${{ matrix.os }}
+          path: dist/CALCULATOR${{ startsWith(matrix.os, 'windows') && '.exe' || '' }}
 
 
   # --- Android APK Build (Kivy + Buildozer) ---
   build-android-apk:
-    runs-on: ubuntu-latest # Buildozer requires a Linux environment
-    # Only run this job if the primary script is Kivy-compatible or you have a Kivy port.
-    # Otherwise, this job will fail trying to include Tkinter.
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -60,26 +53,33 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11' # Buildozer often requires a specific JDK version
+          java-version: '11'
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install Buildozer and Kivy
+      # --- Corrected Android SDK Setup ---
+      - name: Set up Android SDK
+        uses: nttld/setup-android@v1 # <--- CHANGED FROM @v1.3 TO @v1
+        with:
+          android-version: 30 # Or 33. This should generally match your buildozer.spec's android.api
+          build-tools-version: 30.0.3 # Or 33.0.0. A specific stable version is good.
+          sdk-tools-version: 6858069 # Latest stable command-line tools version
+      # ---------------------------------------------
+
+      - name: Install Buildozer, Kivy, and Cython
         run: |
           python -m pip install --upgrade pip
-          pip install virtualenv # Buildozer often uses virtualenvs
+          pip install virtualenv
+          pip install cython
           pip install buildozer kivy
 
       - name: Initialize Buildozer spec file (if not already present)
-        # This step is usually done once locally and the buildozer.spec is committed.
-        # If it's already in your repo, you can skip this.
         run: |
-          buildozer init
-          # If you have specific Android app settings, modify buildozer.spec here or ensure it's committed
-          # Example modification (uncomment if you need to set requirements or permissions in CI)
+          # buildozer init # Only run if buildozer.spec is NOT in your repo
+          # Example modifications (ensure these are in your committed buildozer.spec)
           # sed -i 's/^requirements = python3,kivy$/requirements = python3,kivy,math/' buildozer.spec
           # sed -i 's/^#android.permissions =$/android.permissions = INTERNET,VIBRATE/' buildozer.spec
           # sed -i 's/^title = My Application$/title = Your Kivy Android App/' buildozer.spec
@@ -88,12 +88,10 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # The 'debug' build is faster for CI. Use 'release' for app stores (requires keystore management).
-          # This command will download Android SDK/NDK components and compile.
           buildozer android debug
 
       - name: Upload Android APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: YourAppName-Android-APK
-          path: bin/*.apk # Buildozer places the APK in the 'bin' directory
+          name: CALCULATOR-Android-APK
+          path: bin/*.apk
