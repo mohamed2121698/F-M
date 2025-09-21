@@ -60,9 +60,9 @@ jobs:
         with:
           python-version: '3.9'
 
-      # --- ADD THESE STEPS FOR ANDROID SDK SETUP ---
+      # --- Corrected Android SDK Setup ---
       - name: Set up Android SDK
-        uses: nttld/setup-android@v1.3 # Use this action to provision Android SDK components
+        uses: nttld/setup-android@v1 # <--- CHANGED FROM @v1.3 TO @v1
         with:
           android-version: 30 # Or 33. This should generally match your buildozer.spec's android.api
           build-tools-version: 30.0.3 # Or 33.0.0. A specific stable version is good.
@@ -73,11 +73,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install virtualenv
-          pip install cython # Ensure Cython is installed
+          pip install cython
           pip install buildozer kivy
 
       - name: Initialize Buildozer spec file (if not already present)
-        # Remember to commit your buildozer.spec file after local 'buildozer init'
         run: |
           # buildozer init # Only run if buildozer.spec is NOT in your repo
           # Example modifications (ensure these are in your committed buildozer.spec)
