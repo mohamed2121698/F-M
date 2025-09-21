@@ -36,7 +36,7 @@ jobs:
           # --windowed or --noconsole: For GUI apps, prevents a console window from opening.
           # --icon: Path to your application icon (e.g., 'icon.ico' for Windows, 'icon.icns' for macOS).
           # For a Tkinter app, '--windowed' is usually appropriate.
-          pyinstaller --onefile --windowed --name "YourAppName" your_app_script.py
+          pyinstaller --onefile --windowed --name "CALCULATOR.py" your_app_script.py
         shell: bash # Use bash shell for cross-platform compatibility where possible
 
       - name: Upload artifact
