@@ -37,8 +37,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YourAppName-${{ matrix.os }}
-          path: dist/YourAppName${{ startsWith(matrix.os, 'windows') && '.exe' || '' }}
+          name: CALCULATOR-${{ matrix.os }}
+          path: dist/CALCULATOR${{ startsWith(matrix.os, 'windows') && '.exe' || '' }}
 
 
   # --- Android APK Build (Kivy + Buildozer) ---
@@ -94,5 +94,5 @@ jobs:
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YourAppName-Android-APK
+          name: CALCULATOR-Android-APK
           path: bin/*.apk
